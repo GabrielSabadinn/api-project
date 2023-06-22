@@ -1,6 +1,14 @@
 const fastify = require('fastify')();
 const mssql = require('mssql');
-
+const start = async () => {
+  try {
+    await fastify.listen({ port: process.env.port })
+  } catch (err) {
+    fastify.log.error(err)
+    process.exit(1)
+  }
+}
+start()
 // conexão
 mssql.connect(process.env.SQLServer)
   .then(() => {
@@ -12,7 +20,7 @@ mssql.connect(process.env.SQLServer)
   });
 
 // buscar os dados federais
-fastify.get('/federal', (request, reply) => {
+fastify.get('/api/cnd/federal', (request, reply) => {
   mssql.query('EXEC [CND].[Buscar.Federal]')
     .then((results) => {
       reply.send(results.recordset);
@@ -24,7 +32,7 @@ fastify.get('/federal', (request, reply) => {
 });
 
 // buscar os dados estaduais
-fastify.get('/estadual', (request, reply) => {
+fastify.get('/api/cnd/estadual', (request, reply) => {
   mssql.query('EXEC [CND].[Buscar.Estadual]')
     .then((results) => {
       reply.send(results.recordset);
@@ -36,7 +44,7 @@ fastify.get('/estadual', (request, reply) => {
 });
 
 // buscar os dados municipais
-fastify.get('/municipal', (request, reply) => {
+fastify.get('/api/cnd/municipal', (request, reply) => {
   mssql.query('EXEC [CND].[Buscar.Municipal]')
     .then((results) => {
       reply.send(results.recordset);
@@ -47,10 +55,3 @@ fastify.get('/municipal', (request, reply) => {
     });
 });
 
-fastify.listen(3001, (error, address) => {
-  if (error) {
-    console.error('Erro ao iniciar o servidor:', error);
-    process.exit(1);
-  }
-  console.log(`Servidor rodando em ${address}`);
-});
